@@ -1,0 +1,164 @@
+appConfig:
+  theme: crayola
+  layout: auto
+  iconSize: medium
+  language: en
+pageInfo:
+  title: Home Lab
+  description: ''
+  navLinks: []
+  footerText: ''
+sections:
+  - name: Productivity
+    displayData:
+      collapsed: false
+      cols: 1
+      sortBy: default
+      rows: 2
+      hideForGuests: true
+    items:
+      - title: Syncthing
+        description: Peer-to-peer file synchronization
+        icon: img/icons/dashy-logo.png
+        id: 0_1302_syncthing
+  - name: Firewall
+    items:
+      - title: NetData
+        description: System resource usage on firewall
+        icon: img/icons/dashy-logo.png
+        id: 0_822_netdata
+  - name: Networks
+    items:
+      - title: SmokePing
+        description: Network latency monitoring
+        icon: img/icons/smokeping.jpg
+        url: http://10.0.0.223:8383
+        target: newtab
+        id: 0_861_smokeping
+  - name: System Maintence
+    items:
+      - title: Portainer
+        description: Docker container management
+        icon: img/icons/portainer.svg
+        url: https://10.0.0.223:9443
+        target: newtab
+        id: 0_1593_portainer
+      - title: Glances
+        description: Simple resource usage
+        icon: img/icons/dashy-logo.png
+        id: 1_1593_glances
+      - title: Dozzle
+        description: Docker container web log viewer
+        icon: img/icons/dozzle.png
+        url: http://10.0.0.223:8282
+        target: newtab
+        id: 2_1593_dozzle
+      - title: Watchtower
+        description: Automatic Image update service
+        id: 3_1593_watchtower
+  - name: External Services
+    items:
+      - title: HealthChecks
+        description: Cron Job Monitoring
+        url: https://healthchecks.io/checks/
+        target: newtab
+        id: 0_1703_healthchecks
+      - title: ISP - Comcast
+        description: Broadband internet provider
+        url: https://xfinity.com/
+        target: newtab
+        id: 1_1703_ispcomcast
+      - title: add
+        description: Automatic Updates
+        target: newtab
+        id: 2_1703_add
+  - name: Media
+    items:
+      - title: Plex
+        description: Self-Hosted Media Streaming Service
+        icon: img/icons/plex.png
+        url: http://10.0.0.223:32400/web
+        target: newtab
+        id: 0_480_plex
+      - title: Tautulli
+        description: Monitoring and statistics for Plex
+        icon: img/icons/tautulli.png
+        url: http://10.0.0.223:8181
+        target: newtab
+        id: 1_480_tautulli
+      - title: plex_media_manager
+        description: Plex Library display manager
+        icon: img/icons/plex.png
+        url: http://10.0.0.223
+        target: newtab
+        id: 2_480_plexmediamanager
+      - title: Airsonic
+        description: Music and Podcast Player
+        icon: img/icons/airsonic.png
+        url: http://10.0.0.223:4040
+        target: newtab
+        id: 3_480_airsonic
+    displayData:
+      sortBy: most-used
+      rows: 1
+      cols: 1
+      collapsed: false
+      hideForGuests: false
+  - name: External Utilities
+    displayData:
+      collapsed: false
+      sortBy: default
+      rows: 1
+      cols: 1
+      hideForGuests: false
+    items:
+      - title: Public IP
+        description: Check public IP and associated data
+        url: https://www.whatismyip.com/
+        id: 0_1823_publicip
+      - title: Who Is Lookup
+        description: Check ICAN info for a given IP address or domain
+        url: https://whois.domaintools.com/
+        id: 1_1823_whoislookup
+      - title: Speed Test
+        description: Upload + download speeds and latency
+        url: https://speed.cloudflare.com/
+        id: 2_1823_speedtest
+      - title: Heimdall
+        description: Alternative homepage
+        url: http://10.0.0.223:8010
+        target: newtab
+        id: 3_1823_heimdall
+  - name: Host monitoring
+    icon: fad fa-clock
+    widgets:
+      - type: clock
+        options:
+          timeZone: America/Denver
+          format: en-US
+        id: 0_1540_clock
+      - type: gl-cpu-history
+        options:
+          hostname: http://10.0.0.223:61208
+          limit: 60
+        id: 1_1540_glcpuhistory
+      - type: gl-mem-history
+        options:
+          hostname: http://10.0.0.223:61208
+          limit: null
+        id: 2_1540_glmemhistory
+      - type: gl-system-load
+        options:
+          hostname: http://10.0.0.223:61208
+        id: 3_1540_glsystemload
+      - type: gl-cpu-temp
+        options:
+          hostname: http://10.0.0.223:61208
+          units: C
+        id: 4_1540_glcputemp
+    displayData:
+      sortBy: default
+      rows: 1
+      cols: 1
+      collapsed: false
+      hideForGuests: false

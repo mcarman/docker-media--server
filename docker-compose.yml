@@ -1,0 +1,373 @@
+version: '3.9'
+
+#####
+# Common Configs
+##### 
+x-environment:
+  &tz-puid-pgid
+  - TZ=${TZ:-Etc/UTC}
+  - PUID=${PUID:-1000}
+  - PGID=${PGID--1000}
+
+#####
+# services section
+#####
+services:
+
+  ###
+  # Portainer - Manage docker contsainers and stack
+  ###
+  portainer:
+    image: portainer/portainer-ce:linux-arm64-2.16.2-alpine
+    container_name: portainer
+    hostname: $HOSTNAME
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+      - "8000:8000"
+    volumes:
+      - "/var/lib/docker:/var/lib/docker"
+      - "portainer_data:/data"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    restart: unless-stopped
+
+  ###
+  # Plex- Media Server
+  ###  
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    hostname: $HOSTNAME
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+      - VERSION=docker
+      - PLEX_CLAIM=${PLEX_CLAIM}
+      # - advertize IP
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
+    volumes:
+      - "${MEDIA_DIR}/media/Movies:/movies"
+      - "${MEDIA_DIR}/media/tv:/tv"
+      - "/var/lib/docker:/var/lib/docker"
+      - "plex_config:/config"
+    restart: unless-stopped
+
+  ###
+  # Plex Meta Manager - organize and present media
+  ###
+  plex_meta_manager:
+    image: lscr.io/linuxserver/plex-meta-manager:latest
+    container_name: plex_meta_manager
+    hostname: $HOSTNAME
+    restart: unless-stopped
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - plex
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+      - GUID=${GUID:-1000}
+      - PMM_CONFIG=${PMM_CONFIG:-/config/config.yml} #optional
+      - PMM_TIME=${PMM_TIME:-03:00} #optional
+      - PMM_RUN=${PMM_RUN:-False} #optional
+      - PMM_TEST=${PMM_TEST:-False} #optional
+      - PMM_NO_MISSING=${PMM_NO_MISSING:-False} #optional
+    volumes:
+      - $APPDATA/plex_meta_manager/config:/config
+    command: -r
+
+  ###
+  #  tautulli - Utilities for Plex
+  ###  
+  tautulli:
+    image: lscr.io/linuxserver/tautulli:latest
+    container_name: tautulli
+    hostname: $HOSTNAME
+    depends_on:
+      - plex
+    environment:
+      #  &tz-puid-pgid
+      - PUID=${PUID:-1000}
+      - PGID=${GUID:-1000}
+      - GUID=${GUID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "8181:8181"
+    volumes:
+      - $APPDATA/tautulli/config:/config
+      - $PLEX_LOGS:/plexlogs
+    restart: unless-stopped
+  
+  ###
+  # Airsonic advanced port 4040
+  ###
+  airsonic:
+    image: lscr.io/linuxserver/airsonic-advanced:latest
+    container_name: airsonic
+    hostname: $HOSTNAME
+    volumes:
+      - $MEDIA_DIR/media/audio:/music
+      - $MEDIA_DIR/media/audio/playlists:/playlists
+      - $MEDIA_DIR/media/podcasts:/podcasts
+      - $APPDATA/airsonic/config:/config
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 4040:4040
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${GUID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    restart: unless-stopped
+
+  ###
+  # Heimdall homepage with links to all apps
+  ###
+  heimdall:
+    image: lscr.io/linuxserver/heimdall
+    container_name: heimdall
+    hostname: $HOSTNAME
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - $APPDATA/heimdall/config:/config
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    restart: unless-stopped
+
+  ###
+  # Dashy alternative to heimdall port 4000
+  ###
+  dashy:
+    # build: .
+    image: lissy93/dashy
+    container_name: dashy
+    hostname: $HOSTNAME
+    volumes:
+      - $APPDATA/dashy/public/config.yml:/app/public/conf.yml
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 4000:80
+    environment:
+      - UID=${PUID:-1000}
+      - GID=${GUID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    restart: unless-stopped
+    healthcheck:
+      test: [ 'CMD', 'node', '/app/services/healthcheck' ]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  ###
+  # dozzlw Log aggregator
+  ###
+  dozzle:
+    container_name: dozzle
+    image: amir20/dozzle:latest
+    hostname: $HOSTNAME
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - default
+    ports:
+      - 8282:8080
+  
+  ###
+  # Smokeping network connectivity monitor port 8383
+  ###
+  smokeping:
+    build:
+      context: ${DOCKER_DIR}/docfile/smokeping/
+      dockerfile: Dockerfile.smokeping
+      #args: 
+      #  BUILD_DATE:
+      #  VERSION:
+    image: lscr.io/linuxserver/smokeping:latest
+    container_name: smokeping
+    hostname: $HOSTNAME
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    volumes:
+      - $APPDATA/smokeping/config:/config
+      - $MEDIA_DIR/appdata/smokeping/data:/data
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - 8383:80
+    restart: unless-stopped
+
+  ###
+  # Samba file share on windows and linux fs
+  ###
+  samba:
+    build:
+      context: "$APPDATA/samba-pwntr"
+      dockerfile: Dockerfile
+      args:
+        - SAMBA_USER
+        - SAMBA_USER2
+        - SAMBA_USER3
+        - SAMBA_GROUP
+        - SAMBA_PASSWD
+        - PUID
+        - PGID
+    image: pwntr/samba
+    container_name: samba
+    hostname: $HOSTNAME
+    network_mode: host
+    security_opt:
+      - no-new-privileges:true
+    stdin_open: true
+    tty: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - $APPDATA/samba-pwntr/config:/config
+      - $APPDATA/samba-pwntr/etc/samba:/etc/samba
+      - $MEDIA_DIR/media:/shares/media
+      - $MEDIA_DIR:/shares
+    environment:
+      - "TZ=${TZ:-Etc/UTC}"
+      - "SAMBA_LOG_LEVEL=0"
+      - "PUID=${PUID:-1000}"
+      - "PGID=${PGID:-1000}"
+      - "SAMBA_USER=${SAMBA_USER:-sambashare}"
+      - "SAMBA_GROUP=${SAMBA_GROUP:-sambashare}"
+      - "SAMBA_PASSWD=${SAMBA_PASSWD:-sambashare}"
+    restart: unless-stopped
+
+  ###
+  # wsdd to advertize name to the network for samba
+  ###
+  #  wsdd:
+  #    image: jonasped/wsdd
+  #    build:
+  #      context: $DOCKER_DIR/docfile/wsdd
+  #      dockerfile: Dockerfile.wsdd  
+  #    networks:
+  #      media_net:
+  ##        ipv4_address: "10.0.0.13"
+  #    environment:
+  #      - "HOSTNAME=$HOSTNAME"
+  #    restart: unless-stopped
+
+  ###
+  # avahi to advertize the share to linux/mac
+  ###
+  avahi:
+    image: ydkn/avahi
+    container_name: "avahi"
+    hostname: $HOSTNAME
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - $APPDATA/avahi/services:/etc/avahi/services:ro
+    restart: unless-stopped
+
+  ###
+  # Watchtower to automate updates
+  ###
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    hostname: $HOSTNAME
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}
+    #  command: --interval 3600
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      ###
+      # cloudflare for dns
+      ###
+      #  cloudflare-ddns:
+      #    image: oznu/cloudflare-ddns:latest
+      #    restart: unless-stopped
+      #    environment:
+      #      - API_KEY=${CF_API_TOKEN]
+      # - ZONE=bret.dk
+      #      - SUBDOMAIN=ddns
+      #      - PROXIED=false 
+      #      - PUID=${PUID:-1000}
+      #      - PGID=${PGID:-1000}
+      #      - TZ=${TZ:-Etc/UTC}
+      #    networks:
+      #      - media_net
+
+####
+# System Volumes
+####
+volumes:
+  plex_config:
+    external: true
+  portainer_data:
+    external: true
+
+####
+# Networks uise macvlan to set ip for each container
+####
+networks:
+  default:
+    driver: bridge
+
+#  media_net:
+#    driver: macvlan
+#    driver_opts:
+#      parent: eth0 # using ifconfig
+#    ipam:
+#      config:
+#        - subnet: "10.0.0.0/24"
+#          ip_range: "10.0.0.10/27" # ip range 10.0.0.10 to 10.0.0.42 #bcast 10.0.0.41
+#          gateway: "10.0.0.1"

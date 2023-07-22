@@ -1,0 +1,27 @@
+# Base env variables
+PUID=
+PGID=
+GUID=
+TZ=
+DOCKER_DIR=<path to docker files e.g. ~/docker>
+MEDIA_DIR=<path to where you have the media files mounted
+
+# Plex variables1
+PLEX_CLAIM=
+#PLEX_UID=
+#PLEX_GID=
+PLEX_TOKEN=
+
+#  Plex Meta Manager Variables
+# PMM_CONFIG= #optional
+PMM_TIME=03:00 #optional
+PMM_RUN=False #optional
+PMM_TEST=False #optional
+PMM_NO_MISSING=False #optional
+
+# TMDB credentials
+TMDB_TOKEN=<the movie database token>
+
+# Trakt login credentials
+TRAKT_CLIENT_ID=<trakt client ID from trakt site>
+TRAKT_CLIENT_SECRET=<trakt secret key from the trakt site>
