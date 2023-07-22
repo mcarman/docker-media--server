@@ -9,6 +9,8 @@ appdata/airsonic/config/db/*
 appdata/airsonic/config/thumbs/*
 appdata/airsonic/config/java/*
 appdata/airsonic/config/airsonic.log.*
+appdata/airsonic/config/index19/*
+appdata/airsonic/config/lastfmcache/*
 
 ## Dashy
 appdata/dashy/public/fonts/*
@@ -39,13 +41,14 @@ appdata/Plex-Meta-Manager/*
 ## tautulli
 appdata/tautulli/config/backups/*
 appdata/tautulli/config/cache/images/*
-appdata/tautulli/config/session_metadata/*
+appdata/tautulli/config/cache/session_metadata/*
 appdata/tautulli/config/logs/*
 
 ## doc files
-appdata/docfiles/*
+appdata/docfile/*
+docfile/*
 
-mnamer-v2.json
+.mnamer-v2.json
 
 
 
