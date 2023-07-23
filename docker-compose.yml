@@ -287,17 +287,32 @@ services:
   ###
   # wsdd to advertize name to the network for samba
   ###
-  #  wsdd:
-  #    image: jonasped/wsdd
-  #    build:
-  #      context: $DOCKER_DIR/docfile/wsdd
-  #      dockerfile: Dockerfile.wsdd  
-  #    networks:
-  #      media_net:
-  ##        ipv4_address: "10.0.0.13"
-  #    environment:
-  #      - "HOSTNAME=$HOSTNAME"
-  #    restart: unless-stopped
+  wsdd:
+    build:
+      context: $APPDATA/wsdd
+      args:
+        - BUILD_DATA
+        - VERSION
+        - WSDD_VERSION
+        - HOSTNAME
+        - WORKGROUP
+      dockerfile: Dockerfile.wsdd2  
+    image: jonasped/wsdd
+    container_name: wsdd
+    hostname: $HOSTNAME
+    networks:
+      default:
+    environment:
+      - "HOSTNAME=$HOSTNAME"
+      - "WORKGROUP=$WORKGROUP"
+      - "TZ=${TZ:-Etc/UTC}"
+      - "PUID=${PUID:-1000}"
+      - "PGID=${PGID:-1000}"
+    security_opt:
+      - no-new-privileges:true
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
 
   ###
   # avahi to advertize the share to linux/mac
@@ -362,12 +377,3 @@ networks:
   default:
     driver: bridge
 
-#  media_net:
-#    driver: macvlan
-#    driver_opts:
-#      parent: eth0 # using ifconfig
-#    ipam:
-#      config:
-#        - subnet: "10.0.0.0/24"
-#          ip_range: "10.0.0.10/27" # ip range 10.0.0.10 to 10.0.0.42 #bcast 10.0.0.41
-#          gateway: "10.0.0.1"
