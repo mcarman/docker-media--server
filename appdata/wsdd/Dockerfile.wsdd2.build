@@ -1,6 +1,7 @@
 FROM debian:bookworm as buildstage1
 
 ARG WSDD2_VERSION=$WSDD2_VERSION
+ENV DEBIANFRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y --no-install-recommends
 RUN apt-get install -y --no-install-recommends make \
@@ -18,11 +19,9 @@ RUN cd wsdd2-${WSDD@_VERSION]} && \
 FROM debian:bookworm-slim
 
 
-
-
 ARG BUILD_DATE=$BUILD_DATE
 ARG VERSION="4.18"
-ARG WSDD_VERSION=$WSDD_VERSION
+ARG WSDD2_VERSION=$WSDD_VERSION
 ARG WORKGROUP=$WORKGROUP
 ENV DEBIANFRONTEND=noninteractive
 

@@ -3,8 +3,7 @@ version: '3.9'
 #####
 # Common Configs
 ##### 
-x-environment:
-  &tz-puid-pgid
+x-environment: &tz-puid-pgid
   - TZ=${TZ:-Etc/UTC}
   - PUID=${PUID:-1000}
   - PGID=${PGID--1000}
@@ -127,7 +126,7 @@ services:
       - $APPDATA/tautulli/config:/config
       - $PLEX_LOGS:/plexlogs
     restart: unless-stopped
-  
+
   ###
   # Airsonic advanced port 4040
   ###
@@ -215,7 +214,7 @@ services:
       - default
     ports:
       - 8282:8080
-  
+
   ###
   # Smokeping network connectivity monitor port 8383
   ###
@@ -249,7 +248,7 @@ services:
   ###
   samba:
     build:
-      context: "$APPDATA/samba-pwntr"
+      context: "$APPDATA/samba"
       dockerfile: Dockerfile
       args:
         - SAMBA_USER
@@ -294,9 +293,10 @@ services:
         - BUILD_DATA
         - VERSION
         - WSDD_VERSION
+        - WSDD2_VERSION
         - HOSTNAME
         - WORKGROUP
-      dockerfile: Dockerfile.wsdd2  
+      dockerfile: Dockerfile.wsdd2
     image: jonasped/wsdd
     container_name: wsdd
     hostname: $HOSTNAME
@@ -361,9 +361,9 @@ services:
       #    networks:
       #      - media_net
 
-####
-# System Volumes
-####
+      ####
+      # System Volumes
+      ####
 volumes:
   plex_config:
     external: true
@@ -376,4 +376,3 @@ volumes:
 networks:
   default:
     driver: bridge
-
