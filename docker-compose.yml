@@ -17,7 +17,7 @@ services:
   # Portainer - Manage docker contsainers and stack
   ###
   portainer:
-    image: portainer/portainer-ce:linux-arm64-2.16.2-alpine
+    image: portainer/portainer-ce:linux-arm64-2.18.4-alpine
     container_name: portainer
     hostname: $HOSTNAME
     environment:
@@ -249,7 +249,7 @@ services:
   samba:
     build:
       context: "$APPDATA/samba"
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.samba
       args:
         - SAMBA_USER
         - SAMBA_USER2
@@ -269,8 +269,8 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - $APPDATA/samba-pwntr/config:/config
-      - $APPDATA/samba-pwntr/etc/samba:/etc/samba
+      - $APPDATA/samba/config:/config
+      - $APPDATA/samba/etc/samba:/etc/samba
       - $MEDIA_DIR/media:/shares/media
       - $MEDIA_DIR:/shares
     environment:
@@ -290,26 +290,34 @@ services:
     build:
       context: $APPDATA/wsdd
       args:
-        - BUILD_DATA
+        - BUILD_DATE
         - VERSION
         - WSDD_VERSION
         - WSDD2_VERSION
         - HOSTNAME
         - WORKGROUP
+        - PUID
+        - PGID
       dockerfile: Dockerfile.wsdd2
     image: jonasped/wsdd
     container_name: wsdd
     hostname: $HOSTNAME
     networks:
       default:
+    volumes:
+      - $APPDATA/wsdd/
     environment:
       - "HOSTNAME=$HOSTNAME"
       - "WORKGROUP=$WORKGROUP"
       - "TZ=${TZ:-Etc/UTC}"
       - "PUID=${PUID:-1000}"
       - "PGID=${PGID:-1000}"
-    security_opt:
-      - no-new-privileges:true
+      - "VERSION=${VERSION:-1.0.0}"
+      - "WSDD2_VERSION=${WSDD2_VERSION:-1.8.7}"
+      - "WSDD_VERSION=${WSDD_VERSION:-0.7.1}"
+      - "BUILD_DATE=${BUILD_DATE:-30Jul2023}"
+    cap_add:
+      - CAP_NET_ADMIN
     stdin_open: true
     tty: true
     restart: unless-stopped
@@ -341,9 +349,42 @@ services:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
       - TZ=${TZ:-Etc/UTC}
+
     #  command: --interval 3600
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+  
+  ###
+  # nord vpn 
+  ###
+  nvpn:
+    image: ghcr.io/bubuntux/nordlynx
+    container_name: nvpn
+    hostname: $HOSTNAME
+    cap_add:
+     - NET_ADMIN
+     - SYS_MODULE
+    environment:
+      - PRIVATE_KEY=$NVPN_PRIVATE_KEY
+      - QUERY=filters\[servers_groups\]\[identifier\]=legacy_p2p
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Etc/UTC}                # Review https://github.com/bubuntux/nordvpn#environment-variables
+      - TOKEN=$NVPN_TOKEN
+      - NET_LOCAL=$NVPN_NETWORK
+    ports:
+      - 6999:6999
+    sysctls:
+      - net.ipv4.conf.all.src_valid_mark=1   # maybe
+      - net.ipv4.conf.all.rp_filter=2        # maybe; set reverse path filter to loose mode
+      - net.ipv6.conf.all.disable_ipv6=1     # disable ipv6; recommended if using ipv4 only
+    restart: unless-stopped
+  #torrent:
+  #  image: ghcr.io/linuxserver/qbittorrent
+  #  network_mode: service:vpn
+  #  depends_on:
+  #    - vpn
+     
       ###
       # cloudflare for dns
       ###

@@ -23,23 +23,31 @@ RUN apk --no-cache upgrade && \
     rm -rf /tmp/*
 
 #     mkdir /config /shares
-RUN bash && exec /bin/bash && \
-    mkdir -p /config && \
-    mkdir -p /shares/media && \
+RUN mkdir -p /config && \
+    mkdir -p /shares/media/{Movies mdc1} && \
     chmod 2777 /shares/media && \
     chmod 2775 /config 
 
-    # add grouop, adduser and allow to run as root
+# add grouop, adduser and allow to run as root
 RUN addgroup -g $PGID ${SAMBA_GROUP} && \
     adduser -H -D -u $PUID $SAMBA_USER -G $SAMBA_GROUP && \
-    # set passwprd and let uer run as root; \
+    adduser -H -D $SAMBA_USER2 -G $SAMBA_GROUP && \
+    adduser -H -D $SAMBA_USER3 -G $SAMBA_GROUP && \
+    # set passwprd and let user run as root; \
     echo "$SAMBA_USER:$SAMBA_PASSWD" | chpasswd && \
+    echo "$SAMBA_USER2:$SAMBA_PASSWD" | chpasswd && \
+    echo "$SAMBA_USER3:$SAMBA_PASSWD" | chpasswd && \
     echo "permit nopass :$SAMBA_GROUP as root" > /etc/doas.d/doas.conf && \
-    smbpasswd -s -n -a $SAMBA_USER
+    smbpasswd -s -n -a $SAMBA_USER && \
+    smbpasswd -s -n -a $SAMBA2_USER && \ 
+    smbpasswd -s -n -a $SAMBA3_USER && \
+    echo "permit nopass :$SAMBA_GROUP as root" > /etc/doas.d/doas.conf
+
+WORKDIR /config
 
 # copy config files from project 
 # folder to get a default config going for samba and supervisord
-COPY . /config
+COPY /config/* /config
 # RUN  chmod +x entrypoint.sh
 
 # volume mappings
@@ -49,5 +57,5 @@ VOLUME /config /shares
 # 137, 138 for nmbd and 139, 445 for smbd)
 EXPOSE 445
 
-ENTRYPOINT ["/sbin/tini", "--", "/config/./entrypoint.sh"]
-# CMD ["/bin/bash"]
+ENTRYPOINT ["/sbin/tini", "--", "./entrypoint.sh"]
+CMD []

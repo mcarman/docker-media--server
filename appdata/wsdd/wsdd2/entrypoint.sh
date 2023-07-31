@@ -9,18 +9,18 @@ if [ ! -z "${WSDD_ARGS}" ]; then
   args=${WSDD_ARGS}
 else
 	if [ ! -z "${HOSTNAME}" ]; then
-		args+="-n $HOSTNAME "
+		args+="-N $HOSTNAME "
 	else
 		echo "HOSTNAME environment variable must be set."
 		exit 1
 	fi
 
 	if  [ ! -z "${WORKGROUP}" ]; then
-		args+="-w $WORKGROUP "
+		args+="-G $WORKGROUP "
 	fi
 
 	if  [ ! -z "${DOMAIN}" ]; then
-		args+="-d $DOMAIN "
+		args+="-D $DOMAIN "
 	fi
 fi
 
@@ -34,6 +34,6 @@ handle_signal() {
 
 trap "handle_signal" SIGINT SIGTERM SIGHUP
 
-python wsdd.py ${args} --debug-stdout & wait 
+/usr/sbin/wsdd2 ${args} --debug-stdout & wait 
 
 exit $?

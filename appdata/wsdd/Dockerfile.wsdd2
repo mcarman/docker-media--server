@@ -1,0 +1,57 @@
+FROM debian:bookworm AS buildstage1
+
+ARG WSDD2_VERSION=$WSDD2_VERSION
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends make \
+    gcc \
+    wget \
+    libc-dev \
+    build-essential \
+    tini \
+    ca-certificates
+
+RUN wget -o - https://github.com/Netgear/wsdd2/archive/refs/tags/$WSDD2_VERSION.tar.gz && \
+    tar -zxvf $WSDD2_VERSION.tar.gz $$ \
+    cd wsdd2-$WSDD2_VERSION && \
+    make # && checkintsall -Dy --install=no --nodoc
+
+#ADD https://github.com/Netgear/wsdd2/archive/refs/tags/${WSDD2_VERSION}.tar.gz .
+#RUN mkdir /wsdd2
+#RUN tar -zvxf ${WSDD2_VERSION}.tar.gz --directory /wsdd2
+RUN cp /usr/bin/tini /wsdd2-$WSDD2_VERSION/tini
+RUN mv /wsdd2-$WSDD2_VERSION /wsdd2
+#WORKDIR /wsdd2-
+#RUN make all && checkinstall -Dy --install=no --nodoc
+COPY /wsdd/wsdd2/* /wsdd2
+
+FROM debian:bookworm-slim
+
+RUN mkdir /wsdd2
+COPY --from=0 /wsdd/wsdd2/* /wsdd2
+
+ARG BUILD_DATE=$BUILD_DATE
+ARG VERSION="4.18"
+ARG WSDD2_VERSION=$WSDD2_VERSION
+ARG WORKGROUP=$WORKGROUP
+ARG UID=$PUID
+ARG GID=$PGID
+ENV DEBIAN_FRONTEND=noninteractive
+
+#RUN apt-get update && \
+#    apt-get install tini-y --no-install-recomends && \
+#    apt-get clean && \
+#    apt-get autoremove $$ \
+#    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* && \
+#    mkdir /wsdd2
+
+WORKDIR /wsdd2
+RUN chmod +x entrypoint.sh && \
+    mv wsdd2 /usr/sbin && \
+    mv tini /usr/bin 
+
+EXPOSE 3702 5355
+
+ENTRYPOINT ["/usr/bin/tini", "--", "./entrypoint.sh"]
+CMD [/bin/bash]    
