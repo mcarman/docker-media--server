@@ -310,7 +310,7 @@ services:
     networks:
       default:
     volumes:
-      - $APPDATA/wsdd/:
+      - $APPDATA/wsdd/:/wsdd
     environment:
       - "HOSTNAME=$HOSTNAME"
       - "WORKGROUP=$WORKGROUP"
@@ -369,7 +369,7 @@ services:
       - TZ=${TX:-Etc/UTC}
     volumes:
       - $APPDATA/syncthing/config:/config
-      - $MEDIA_DIR/sync:/data1
+      - $MEDIA_DIR/sync/data1:/data1
     #  - /path/to/data2:/data2
     ports:
       - 8384:8384
