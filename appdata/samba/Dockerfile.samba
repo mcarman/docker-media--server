@@ -1,9 +1,10 @@
-FROM alpine:latest
-
-ARG PGID=${PGID:-1000}
-ARG SAMBA_GROUP=${SAMBA_GROUP:-docker}
-ARG SAMBA_USER=${SAMBA_USER:-sambauser}
-ARG PUID=${PUID:-1000}
+RUN apk add --no-cache bash shadow samba-common-tools samba-server && \
+    groupadd -g ${PGID} ${SAMBA_GROUP} && \
+    useradd -u ${PUID} -g ${PGID} -d /home/${SAMBA_USER} -s /bin/bash ${SAMBA_USER} && \
+    mkdir -p /home/${SAMBA_USER} && \
+    chown ${SAMBA_USER}:${SAMBA_GROUP} /home/${SAMBA_USER} && \
+    mkdir -p /samba && \
+    chown ${SAMBA_USER}:${SAMBA_GROUP} /samba1000}
 ARG SAMBA_PASSWD=${SAMBA_PASSWD:-samba}
 ARG SAMBA_USER2=${SAMBA_USER2:-sambauser2}
 ARG SAMBA_USER3=${SAMBA_USER3:-sambauser3}
@@ -25,11 +26,12 @@ RUN apk --no-cache upgrade && \
 #     mkdir /config /shares
 RUN mkdir -p /config && \
     mkdir -p /shares/media/{Movies mdc1} && \
-    chmod 2777 /shares/media && \
-    chmod 2775 /config 
+    mkdir -p /etc/samba/private && \
+    chmod 2777 /shares && \
+    chmod 2775 /config
 
 # add grouop, adduser and allow to run as root
-RUN addgroup -g $PGID ${SAMBA_GROUP} && \
+RUN addgroup -g $PGID ${SAMBA_GR OUP} && \
     adduser -H -D -u $PUID $SAMBA_USER -G $SAMBA_GROUP && \
     adduser -H -D $SAMBA_USER2 -G $SAMBA_GROUP && \
     adduser -H -D $SAMBA_USER3 -G $SAMBA_GROUP && \
@@ -43,11 +45,10 @@ RUN addgroup -g $PGID ${SAMBA_GROUP} && \
     smbpasswd -s -n -a $SAMBA3_USER && \
     echo "permit nopass :$SAMBA_GROUP as root" > /etc/doas.d/doas.conf
 
-WORKDIR /config
-
 # copy config files from project 
 # folder to get a default config going for samba and supervisord
 COPY /config/* /config
+WORKDIR /config
 # RUN  chmod +x entrypoint.sh
 
 # volume mappings

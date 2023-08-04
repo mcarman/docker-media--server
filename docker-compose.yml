@@ -270,7 +270,7 @@ services:
       - /tmp
     volumes:
       - $APPDATA/samba/config:/config
-      - $APPDATA/samba/etc/samba:/etc/samba
+      - $APPDATA/samba/etc/samba/smb.conf:/etc/samba/smb.conf
       - $MEDIA_DIR/media:/shares/media
       - $MEDIA_DIR:/shares
     environment:
@@ -281,6 +281,8 @@ services:
       - "SAMBA_USER=${SAMBA_USER:-sambashare}"
       - "SAMBA_GROUP=${SAMBA_GROUP:-sambashare}"
       - "SAMBA_PASSWD=${SAMBA_PASSWD:-sambashare}"
+      - "SAMBA_USER2=$SAMBA_USER2"
+      - "SAMBA_USER3=$SAMBA_USER3"
     restart: unless-stopped
 
   ###
@@ -290,7 +292,6 @@ services:
     build:
       context: $APPDATA/wsdd
       args:
-        - BUILD_DATE
         - VERSION
         - WSDD_VERSION
         - WSDD2_VERSION
@@ -302,10 +303,14 @@ services:
     image: jonasped/wsdd
     container_name: wsdd
     hostname: $HOSTNAME
+    sysctls:
+      - sysctl -w net.core.rmem_max=2500000
+      - sysctl -w net.core.wmem_max=2500000
+      - sysctl -w kern.ipc.maxsockbuf=3014656
     networks:
       default:
     volumes:
-      - $APPDATA/wsdd/
+      - $APPDATA/wsdd/:
     environment:
       - "HOSTNAME=$HOSTNAME"
       - "WORKGROUP=$WORKGROUP"
@@ -353,7 +358,26 @@ services:
     #  command: --interval 3600
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-  
+
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing #optional
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${GUID:-1000}
+      - TZ=${TX:-Etc/UTC}
+    volumes:
+      - $APPDATA/syncthing/config:/config
+      - $MEDIA_DIR/sync:/data1
+    #  - /path/to/data2:/data2
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: unless-stopped
+
   ###
   # nord vpn 
   ###
@@ -362,49 +386,49 @@ services:
     container_name: nvpn
     hostname: $HOSTNAME
     cap_add:
-     - NET_ADMIN
-     - SYS_MODULE
+      - NET_ADMIN
+      - SYS_MODULE
     environment:
       - PRIVATE_KEY=$NVPN_PRIVATE_KEY
       - QUERY=filters\[servers_groups\]\[identifier\]=legacy_p2p
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
-      - TZ=${TZ:-Etc/UTC}                # Review https://github.com/bubuntux/nordvpn#environment-variables
+      - TZ=${TZ:-Etc/UTC} # Review https://github.com/bubuntux/nordvpn#environment-variables
       - TOKEN=$NVPN_TOKEN
       - NET_LOCAL=$NVPN_NETWORK
     ports:
       - 6999:6999
     sysctls:
-      - net.ipv4.conf.all.src_valid_mark=1   # maybe
-      - net.ipv4.conf.all.rp_filter=2        # maybe; set reverse path filter to loose mode
-      - net.ipv6.conf.all.disable_ipv6=1     # disable ipv6; recommended if using ipv4 only
+      - net.ipv4.conf.all.src_valid_mark=1 # maybe
+      - net.ipv4.conf.all.rp_filter=2 # maybe; set reverse path filter to loose mode
+      - net.ipv6.conf.all.disable_ipv6=1 # disable ipv6; recommended if using ipv4 only
     restart: unless-stopped
-  #torrent:
-  #  image: ghcr.io/linuxserver/qbittorrent
-  #  network_mode: service:vpn
-  #  depends_on:
-  #    - vpn
-     
-      ###
-      # cloudflare for dns
-      ###
-      #  cloudflare-ddns:
-      #    image: oznu/cloudflare-ddns:latest
-      #    restart: unless-stopped
-      #    environment:
-      #      - API_KEY=${CF_API_TOKEN]
-      # - ZONE=bret.dk
-      #      - SUBDOMAIN=ddns
-      #      - PROXIED=false 
-      #      - PUID=${PUID:-1000}
-      #      - PGID=${PGID:-1000}
-      #      - TZ=${TZ:-Etc/UTC}
-      #    networks:
-      #      - media_net
+    #torrent:
+    #  image: ghcr.io/linuxserver/qbittorrent
+    #  network_mode: service:vpn
+    #  depends_on:
+    #    - vpn
 
-      ####
-      # System Volumes
-      ####
+    ###
+    # cloudflare for dns
+    ###
+    #  cloudflare-ddns:
+    #    image: oznu/cloudflare-ddns:latest
+    #    restart: unless-stopped
+    #    environment:
+    #      - API_KEY=${CF_API_TOKEN]
+    # - ZONE=bret.dk
+    #      - SUBDOMAIN=ddns
+    #      - PROXIED=false 
+    #      - PUID=${PUID:-1000}
+    #      - PGID=${PGID:-1000}
+    #      - TZ=${TZ:-Etc/UTC}
+    #    networks:
+    #      - media_net
+
+    ####
+    # System Volumes
+    ####
 volumes:
   plex_config:
     external: true

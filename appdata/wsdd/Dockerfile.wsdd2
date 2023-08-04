@@ -12,16 +12,17 @@ RUN apt-get update && \
     tini \
     ca-certificates
 
-RUN wget -o - https://github.com/Netgear/wsdd2/archive/refs/tags/$WSDD2_VERSION.tar.gz && \
-    tar -zxvf $WSDD2_VERSION.tar.gz $$ \
-    cd wsdd2-$WSDD2_VERSION && \
-    make # && checkintsall -Dy --install=no --nodoc
-
+RUN wget -o - https://api.github.com/repos/Netgear/wsdd2/tarball/$WSDD2_VERSION
+RUN tar -zxvf $WSDD2_VERSION
+RUN cd Netgear-wsdd2-???????
+RUN make 
+# && checkintsall -Dy --install=no --nodoc
+# RUN mkdir /wsdd2
+RUN mv /wsdd2-$WSDD2_VERSION-??????? /wsdd2 
 #ADD https://github.com/Netgear/wsdd2/archive/refs/tags/${WSDD2_VERSION}.tar.gz .
 #RUN mkdir /wsdd2
 #RUN tar -zvxf ${WSDD2_VERSION}.tar.gz --directory /wsdd2
-RUN cp /usr/bin/tini /wsdd2-$WSDD2_VERSION/tini
-RUN mv /wsdd2-$WSDD2_VERSION /wsdd2
+RUN cp /usr/bin/tini /wsdd2/tini
 #WORKDIR /wsdd2-
 #RUN make all && checkinstall -Dy --install=no --nodoc
 COPY /wsdd/wsdd2/* /wsdd2

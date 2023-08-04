@@ -1,0 +1,11 @@
+FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+ARG PUID=$PUID
+ARG GUID=$GUID
+ARG HOSTNAME=$HOSTNAME
+ARG WORKGROUP=$WORKGROUP
+ARG DOMAIN=$DOMAIN
+
+RUN apt-get install -y --no-install-recommends wsdd2

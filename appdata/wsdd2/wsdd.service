@@ -7,7 +7,7 @@ Wants=network.target
 ; It makes sense to have Samba running when wsdd starts, but is not required.
 ; Thus, the next to lines are disabled and use BindsTo only.
 ; One may also add any of these services to After for stronger binding.
-;BindsTo=smb.service
+BindsTo=smbd.service
 ;BindsTo=samba.service
 
 [Service]

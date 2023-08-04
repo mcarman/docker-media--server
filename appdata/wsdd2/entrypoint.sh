@@ -34,6 +34,11 @@ handle_signal() {
 
 trap "handle_signal" SIGINT SIGTERM SIGHUP
 
+bootparams = "-b vendor:raspberry,model:pi4B,serial:1234567,sku:RP4B4GB,vendorurl:www.raspberrypi.com,modelurl:vilros.com/products/raspberry-pi-4-4gb-ram?src=raspberrypi,presentationurl:www.raspberry.com"
+
+
+args+=bootparams
+
 /usr/sbin/wsdd2 ${args} --debug-stdout & wait 
 
 exit $?
