@@ -1,0 +1,20 @@
+auth:
+  - user: ${USERNAME:-pi}
+    group: ${GROUPNAME:-pi}
+    uid: ${PUID:-1000}
+    gid: ${PGID:-1000}
+    password: $DN_UI_PASSWORD
+
+global:
+  - "force user = "${USERNAME:-pi}"
+  - "force group = "${GROUPNAME:-pi}"
+  - "socket options = TCP_NODELAY SORCVBUF=8192 SO_SNDBUF=8192"
+
+share:
+  - name: media
+    path: /downloads
+    browsable: yes
+    readonly: no
+    guestok: yes
+    veto: no
+    recycle: yes 

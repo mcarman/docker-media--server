@@ -1,0 +1,22 @@
+FROM lscr.io/linuxserver/baseimage-alpine:arm64v8-3.
+
+ # set version label
+ARG BUILD_DATE="23May2023"
+ARG VERSION="4.0"
+ARG WSDD_VERSION
+LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="ironicbadger,sparklyballs"
+
+
+RUN echo "**** install packages ****" && \
+mkdir /wsdd  && cd wsdd && \
+WORKDIR wsdd  && \
+wwget https://raw.githubusercontent.com/christgau/wsdd/master/src/wsdd.py && \
+mv wsdd.py /usr/local/bin/wsdd.py && sudo chmod a+x /usr/local/bin/wsdd.py && \
+RUN systemctl enable wsdd.service && \
+systemctl start wsdd.service 
+
+# if system supports apt
+# wget -O- https://pkg.ltec.ch/public/conf/ltec-ag.gpg.key | gpg --dearmour > /usr/share/keyrings/wsdd.gpg
+# source /etc/os-release
+# echo "deb [signed-by=/usr/share/keyrings/wsdd.gpg] https://pkg.ltec.ch/public/ ${UBUNTU_CODENAME:-${VERSION_CODENAME:-UNKNOWN}} main" > /etc/apt/sources.list.d/wsdd.lis
