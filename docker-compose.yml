@@ -258,6 +258,7 @@ services:
         - SAMBA_PASSWD
         - PUID
         - PGID
+        - BUILD_DATE
     image: pwntr/samba
     container_name: samba
     hostname: $HOSTNAME
@@ -270,7 +271,7 @@ services:
       - /tmp
     volumes:
       - $APPDATA/samba/config:/config
-      - $APPDATA/samba/etc/samba/smb.conf:/etc/samba/smb.conf
+      - $APPDATA/samba/etc/samba/:/etc/samba/
       - $MEDIA_DIR/media:/shares/media
       - $MEDIA_DIR:/shares
     environment:
@@ -278,6 +279,7 @@ services:
       - "SAMBA_LOG_LEVEL=0"
       - "PUID=${PUID:-1000}"
       - "PGID=${PGID:-1000}"
+      - "BUILD_DATE=${BUILD_DATE}"
       - "SAMBA_USER=${SAMBA_USER:-sambashare}"
       - "SAMBA_GROUP=${SAMBA_GROUP:-sambashare}"
       - "SAMBA_PASSWD=${SAMBA_PASSWD:-sambashare}"
@@ -310,7 +312,7 @@ services:
       - sysctl -w net.core.wmem_max=2500000
       - sysctl -w kern.ipc.maxsockbuf=3014656
     networks:
-      default:
+      - default
     volumes:
       - $APPDATA/wsdd/:/wsdd
     environment:
