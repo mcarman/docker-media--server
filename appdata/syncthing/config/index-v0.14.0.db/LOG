@@ -27,3 +27,16 @@
 08:01:11.002429 version@stat F·[1 1] S·551B[344B 207B] Sc·[0.25 0.00]
 08:01:11.268227 db@janitor F·4 G·0
 08:01:11.268319 db@open done T·419.231573ms
+=============== Aug 5, 2023 (UTC) ===============
+03:36:31.770389 db@close closing
+03:36:31.774387 db@close done T·3.990228ms
+=============== Aug 5, 2023 (UTC) ===============
+03:51:58.352214 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+03:51:58.437891 version@stat F·[1 1] S·551B[344B 207B] Sc·[0.25 0.00]
+03:51:58.451107 db@open opening
+03:51:58.452441 journal@recovery F·1
+03:51:58.460285 journal@recovery recovering @6
+03:51:58.637674 memdb@flush created L0@8 N·21 S·437B "\x04de..can,v77":"\nla..ime,v70"
+03:51:58.641723 version@stat F·[2 1] S·988B[781B 207B] Sc·[0.50 0.00]
+03:51:58.921905 db@janitor F·5 G·0
+03:51:58.922070 db@open done T·470.67394ms

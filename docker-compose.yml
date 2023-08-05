@@ -202,7 +202,7 @@ services:
       start_period: 40s
 
   ###
-  # dozzlw Log aggregator
+  # dozzle Log aggregator
   ###
   dozzle:
     container_name: dozzle
@@ -303,6 +303,8 @@ services:
     image: jonasped/wsdd
     container_name: wsdd
     hostname: $HOSTNAME
+    depends_on: 
+      - samba
     sysctls:
       - sysctl -w net.core.rmem_max=2500000
       - sysctl -w net.core.wmem_max=2500000
@@ -334,6 +336,8 @@ services:
     image: ydkn/avahi
     container_name: "avahi"
     hostname: $HOSTNAME
+    depends_on: 
+      - samba
     networks:
       - default
     security_opt:

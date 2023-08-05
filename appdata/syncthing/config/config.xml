@@ -53,7 +53,7 @@
     <gui enabled="true" tls="false" debugging="false">
         <address>127.0.0.1:8384</address>
         <user>pims</user>
-        <password>$2a$10$fRRDWLg0m6zEJsxjoIoOX./MYJyRK66ZN3uARH9QnGgETda498UqK</password>
+        <password></password>
         <apikey>DNFzAvnw7JxGmRi7ZDthSQxYFtoxkoJd</apikey>
         <theme>dark</theme>
     </gui>
