@@ -1,0 +1,14 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash
+
+# make folders
+mkdir -p \
+    /downloads \
+    /incomplete-downloads
+
+# permissions
+lsiown abc:abc \
+    /downloads \
+    /incomplete-downloads
+
+find /config -path /config/Downloads -prune -o -exec lsiown abc:abc {} +

@@ -1,0 +1,33 @@
+---
+
+# jenkins variables
+project_name: docker-sabnzbd
+external_type: github_stable
+release_type: stable
+release_tag: latest
+ls_branch: master
+build_armhf: false
+repo_vars:
+  - EXT_GIT_BRANCH = 'master'
+  - EXT_USER = 'sabnzbd'
+  - EXT_REPO = 'sabnzbd'
+  - BUILD_VERSION_ARG = 'SABNZBD_VERSION'
+  - LS_USER = 'linuxserver'
+  - LS_REPO = 'docker-sabnzbd'
+  - CONTAINER_NAME = 'sabnzbd'
+  - DOCKERHUB_IMAGE = 'linuxserver/sabnzbd'
+  - DEV_DOCKERHUB_IMAGE = 'lsiodev/sabnzbd'
+  - PR_DOCKERHUB_IMAGE = 'lspipepr/sabnzbd'
+  - DIST_IMAGE = 'alpine'
+  - MULTIARCH='true'
+  - CI='true'
+  - CI_WEB='true'
+  - CI_PORT='8080'
+  - CI_SSL='false'
+  - CI_DELAY='120'
+  - CI_DOCKERENV='TZ=US/Pacific'
+  - CI_AUTH='user:password'
+  - CI_WEBPATH=''
+sponsor_links:
+  - { name: "SABnzbd", url: "https://sabnzbd.org/donate" }
+  

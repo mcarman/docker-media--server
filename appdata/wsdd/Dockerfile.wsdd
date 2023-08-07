@@ -1,0 +1,57 @@
+FROM debian:bookworm AS buildstage1
+
+ARG WSDD2_VERSION=$WSDD2_VERSION
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN mkdir wsdd
+WORKDIR wsdd
+COPY . /wsdd
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends make \
+    gcc \
+    wget \
+    libc-dev \
+    build-essential \
+    tini \
+    ca-certificates
+
+RUN wget -o - https://api.github.com/repos/Netgear/wsdd2/tarball/$WSDD2_VERSION && \
+    tar -zxvf $WSDD2_VERSION
+RUN cd Netgear-wsdd2-e37443a && \
+    make
+
+RUN cp /wsdd/Netgear-wsdd2-e37443a/wsdd2 /wsdd
+RUN cp /usr/bin/tini /wsdd
+
+
+FROM debian:bookworm-slim
+
+ARG BUILD_DATE=$BUILD_DATE
+ARG VERSION="4.18"
+ARG WSDD2_VERSION=$WSDD2_VERSION
+ARG WORKGROUP=$WORKGROUP
+ARG HOSTNAME=$HOSTNAME
+ARG UID=$PUID
+ARG GID=$PGID
+ENV DEBIAN_FRONTEND=noninteractive
+
+#RUN apt-get update && \
+#    apt-get install tini-y --no-install-recomends && \
+#    apt-get clean && \
+#    apt-get autoremove $$ \
+#    rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists/* && \
+#    mkdir /wsdd2
+
+# RUN mkdir /wsdd
+COPY --from=0 /wsdd /wsdd
+
+WORKDIR /wsdd
+RUN chmod +x entrypoint.sh && \
+    mv wsdd2 /usr/sbin && \
+    mv tini /usr/bin 
+
+EXPOSE 3702 5355
+
+ENTRYPOINT ["/usr/bin/tini", "--", "./entrypoint.sh"]
+CMD [/bin/bash]    
